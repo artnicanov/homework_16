@@ -101,9 +101,9 @@ def create_db():
 		db.session.add(new_user)  # добавляем объект db в сессию через атрибут session, а к нему применяем метод для добавления пользователя
 		db.session.commit()  # подтверждаем сессию
 
-		for order_data in data.orders:
-			#  создаем объект класса Order
-			new_order = Order(
+	for order_data in data.orders:
+		#  создаем объект класса Order
+		new_order = Order(
 				id=order_data["id"],
 				name=order_data["name"],
 				description=order_data["description"],
@@ -113,18 +113,18 @@ def create_db():
 				customer_id=order_data["customer_id"],
 				executor_id = order_data["executor_id"]
 			)
-			db.session.add(new_order)  # добавляем объект db в сессию через атрибут session, а к нему применяем метод для добавления заказа
-			db.session.commit()  # подтверждаем сессию
+		db.session.add(new_order)  # добавляем объект db в сессию через атрибут session, а к нему применяем метод для добавления заказа
+		db.session.commit()  # подтверждаем сессию
 
-			for offer_data in data.offers:
-				#  создаем объект класса Offer
-				new_offer = Offer(
+	for offer_data in data.offers:
+		#  создаем объект класса Offer
+		new_offer = Offer(
 					id=offer_data["id"],
 					order_id=offer_data["order_id"],
 					executor_id=offer_data["executor_id"]
 				)
-				db.session.add(new_offer)  # добавляем объект db в сессию через атрибут session, а к нему применяем метод для добавления исполнения заказа
-				db.session.commit()  # подтверждаем сессию
+		db.session.add(new_offer)  # добавляем объект db в сессию через атрибут session, а к нему применяем метод для добавления исполнения заказа
+		db.session.commit()  # подтверждаем сессию
 
 @app.route('/users')
 def get_users():
