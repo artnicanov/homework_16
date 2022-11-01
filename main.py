@@ -1,11 +1,10 @@
-import json
-
-from flask import Flask
+from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 import data
 
 app = Flask(__name__)  # переменная app - это экземпляр класса Flask
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"  # устанавливаем конфигурацию для подключения к БД
+app.config["JSON_AS_ASCII"] = False  # задаем конфигурацию чтобы контент с кириллицей читался в любом браузере
 
 db = SQLAlchemy(app)  # создаем экземпляр SQLAlchemy, в который передается наше приложение, а в нем уже есть настройка соединения с базой
 
@@ -83,12 +82,13 @@ class Offer(db.Model):
 
 def create_db():
 	"""  функция создает БД """
-	app.app_context().push()
+	app.app_context().push()  # без создания явного контекста приложения возникает ошибка
 	with app.app_context():
-		db.drop_all()
-		db.create_all()
+		db.drop_all()  # метод для стирания таблицы если она уже была создана
+		db.create_all()  # метод для создания таблицы
+
 	for user_data in data.users:
-		#  создаем объект класса User
+		#  создаем экземпляр класса User
 		new_user = User(
 			id=user_data["id"],
 			first_name = user_data["first_name"],
@@ -101,40 +101,29 @@ def create_db():
 		db.session.add(new_user)  # добавляем объект db в сессию через атрибут session, а к нему применяем метод для добавления пользователя
 		db.session.commit()  # подтверждаем сессию
 
-		for order_data in data.orders:
-			#  создаем объект класса Order
-			new_order = Order(
-				id=order_data["id"],
-				name=order_data["name"],
-				description=order_data["description"],
-				start_date=order_data["start_date"],
-				end_date=order_data["end_date"],
-				address=order_data["address"],
-				customer_id=order_data["customer_id"],
-				executor_id = order_data["executor_id"]
-			)
-			db.session.add(new_order)  # добавляем объект db в сессию через атрибут session, а к нему применяем метод для добавления заказа
-			db.session.commit()  # подтверждаем сессию
+	for order_data in data.orders:
+		# создаем экземпляр класса Order
+		new_order = Order(
+			id=order_data["id"],
+			name=order_data["name"],
+			description=order_data["description"],
+			start_date=order_data["start_date"],
+			end_date=order_data["end_date"],
+			address=order_data["address"],
+			customer_id=order_data["customer_id"],
+			executor_id = order_data["executor_id"]
+		)
+		db.session.add(new_order)  # добавляем объект db в сессию через атрибут session, а к нему применяем метод для добавления заказа
+		db.session.commit()  # подтверждаем сессию
 
-			for offer_data in data.offers:
-				#  создаем объект класса Offer
-				new_offer = Offer(
-					id=offer_data["id"],
-					order_id=offer_data["order_id"],
-					executor_id=offer_data["executor_id"]
-				)
-				db.session.add(new_offer)  # добавляем объект db в сессию через атрибут session, а к нему применяем метод для добавления исполнения заказа
-				db.session.commit()  # подтверждаем сессию
+	for offer_data in data.offers:
+		#  создаем экземпляр класса Offer
+		new_offer = Offer(
+			id=offer_data["id"],
+			order_id=offer_data["order_id"],
+			executor_id=offer_data["executor_id"]
+		)
+		db.session.add(new_offer)  # добавляем объект db в сессию через атрибут session, а к нему применяем метод для добавления исполнения заказа
+		db.session.commit()  # подтверждаем сессию
 
-@app.route('/users')
-def get_users():
-	user_list = User.query.all()  # к классу User применяем атрибут для запроса, а далее метод для получения всех элементов
-	users_result = []
-	for user in user_list:
-		users_result.append(user.user_dict())
-	# возвращаем результат в виде json словаря
-	return json.dumps(users_result)
-
-create_db()
-
-app.run()
+create_db()  # вызываем функцию для создания базы
