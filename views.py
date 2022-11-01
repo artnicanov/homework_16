@@ -98,4 +98,61 @@ def change_or_delete_user(id):
 		main.db.session.commit()
 		return ""
 
+# вьюшка для добавления заказа
+@main.app.route("/orders", methods=["POST"])
+def add_order():
+	order_data = main.json.loads(main.request.data)  #  то что передается в запросе, формируется в json формате
+	#  создаем экземпляр класса Order на основе переданного запроса
+	new_order = main.Order(
+		id=order_data["id"],
+		name=order_data["name"],
+		description=order_data["description"],
+		start_date=order_data["start_date"],
+		end_date=order_data["end_date"],
+		address=order_data["address"],
+		customer_id=order_data["customer_id"],
+		executor_id=order_data["executor_id"]
+	)
+	main.db.session.add(new_order)  # добавляем объект db в сессию через атрибут session, а к нему применяем метод для добавления пользователя
+	main.db.session.commit()  # подтверждаем сессию
+	return ""
+
+# вьюшка для обновления или удаления заказа по id
+@main.app.route("/orders/<int:id>", methods=["PUT", "DELETE"])
+def change_or_delete_order(id):
+	# подготовить для PUT
+
+	if main.request.method == "DELETE":
+		new_order = main.Order.query.get(id)
+		main.db.session.delete(new_order)
+		main.db.session.commit()
+		return ""
+
+# вьюшка для добавления предложения
+@main.app.route("/offers", methods=["POST"])
+def add_offer():
+	offer_data = main.json.loads(main.request.data)  #  то что передается в запросе, формируется в json формате
+	#  создаем экземпляр класса User на основе переданного запроса
+	new_offer = main.Offer(
+		id=offer_data["id"],
+		order_id=offer_data["order_id"],
+		executor_id=offer_data["executor_id"]
+	)
+	main.db.session.add(new_offer)  # добавляем объект db в сессию через атрибут session, а к нему применяем метод для добавления пользователя
+	main.db.session.commit()  # подтверждаем сессию
+	return ""
+
+# вьюшка для обновления или удаления предложения по id
+@main.app.route("/offers/<int:id>", methods=["PUT", "DELETE"])
+def change_or_delete_offer(id):
+	# подготовить для PUT
+
+	if main.request.method == "DELETE":
+		new_offer = main.Offer.query.get(id)
+		main.db.session.delete(new_offer)
+		main.db.session.commit()
+		return ""
+
+
+
 main.app.run()
